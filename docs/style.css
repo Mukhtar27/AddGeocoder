@@ -22,6 +22,16 @@
   }
 }
 
+body.dark {
+  --bg: #1f2937;
+  --text: #f9fafb;
+  --primary: #3b82f6;
+  --secondary: #374151;
+  --border: #4b5563;
+  --box-bg: #111827;
+  --hover: #374151;
+}
+
 body {
   font-family: 'Inter', sans-serif;
   margin: 0;
@@ -31,7 +41,7 @@ body {
   line-height: 1.6;
 }
 
-h1 {
+h1, h2 {
   font-size: 1.8rem;
   margin-bottom: 1rem;
 }
@@ -44,7 +54,8 @@ label {
 
 input[type="file"],
 input[type="password"],
-input[type="text"] {
+input[type="text"],
+select {
   font-size: 1rem;
   padding: 0.6rem 1rem;
   border: 1px solid var(--border);
@@ -98,20 +109,15 @@ button:disabled {
   background-color: var(--secondary);
   margin-bottom: 1rem;
   cursor: pointer;
-  transition: background-color 0.2s ease, transform 0.2s ease;
+  transition: background-color 0.2s ease;
 }
 
 #drop-area.highlight {
   background-color: var(--hover);
-  transform: scale(1.02);
 }
 
-#fileNameDisplay {
-  margin-top: 0.5rem;
-  font-weight: bold;
-}
-
-#tablePreview {
+#tablePreview,
+#resultTable {
   overflow-x: auto;
   margin-bottom: 1rem;
 }
@@ -142,33 +148,18 @@ table td {
   user-select: none;
 }
 
-#progress {
-  margin: 1rem 0;
-  font-weight: bold;
-  color: var(--primary);
-  text-align: center;
-}
-
 .hidden {
   display: none !important;
 }
 
-/* 📱 Responsive Design */
-@media (max-width: 600px) {
-  body {
-    padding: 1rem;
-  }
+#progressBar {
+  width: 100%;
+  height: 20px;
+  margin-top: 0.5rem;
+}
 
-  .container {
-    padding: 1rem;
-  }
-
-  h1 {
-    font-size: 1.4rem;
-  }
-
-  input,
-  button {
-    font-size: 0.9rem;
-  }
+.right-align {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 1rem;
 }
