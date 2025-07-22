@@ -9,20 +9,26 @@
 </head>
 <body>
     <div class="container">
-        <h1>Excel Address Geocoder</h1>
+        <h1>📍 Excel Address Geocoder</h1>
         <div class="api-key-container">
             <input type="password" id="apiKey" placeholder="Enter your Google Maps API Key">
             <input type="checkbox" id="togglePassword"> Show API Key
         </div>
         <div class="file-upload">
-            <input type="file" id="fileInput" accept=".xlsx">
-            <button id="fetchBtn">Fetch Coordinates</button>
+            <p>Upload an Excel file:</p>
+            <div id="dropArea" class="drop-area">
+                Drag and drop file here or <span id="browse">Browse files</span>
+            </div>
+            <input type="file" id="fileInput" accept=".xlsx" style="display:none;">
+            <div id="fileInfo"></div>
         </div>
         <div id="preview" class="preview"></div>
+        <div id="columnSelect" style="display:none;"></div>
+        <button id="fetchBtn" style="display:none;">Fetch Coordinates</button>
+        <div id="successMessage" style="display:none;"></div>
         <div id="results" class="results"></div>
         <button id="downloadBtn" style="display:none;">Download Result Excel</button>
     </div>
     <script src="script.js"></script>
 </body>
 </html>
-
