@@ -32,6 +32,14 @@ h1 {
     margin: 20px 0;
 }
 
+.drop-area {
+    border: 2px dashed #007bff;
+    padding: 20px;
+    text-align: center;
+    cursor: pointer;
+    margin-bottom: 10px;
+}
+
 #preview, #results {
     margin-top: 20px;
     padding: 10px;
@@ -52,4 +60,9 @@ button {
 
 button:hover {
     background: #0056b3;
+}
+
+.success {
+    color: green;
+    font-weight: bold;
 }
