@@ -1,0 +1,174 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap');
+
+:root {
+  --bg: #ffffff;
+  --text: #111827;
+  --primary: #2563eb;
+  --secondary: #f3f4f6;
+  --border: #d1d5db;
+  --box-bg: #ffffff;
+  --hover: #e5e7eb;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #1f2937;
+    --text: #f9fafb;
+    --primary: #3b82f6;
+    --secondary: #374151;
+    --border: #4b5563;
+    --box-bg: #111827;
+    --hover: #374151;
+  }
+}
+
+body {
+  font-family: 'Inter', sans-serif;
+  margin: 0;
+  background-color: var(--bg);
+  color: var(--text);
+  padding: 2rem;
+  line-height: 1.6;
+}
+
+h1 {
+  font-size: 1.8rem;
+  margin-bottom: 1rem;
+}
+
+label {
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  display: block;
+}
+
+input[type="file"],
+input[type="password"],
+input[type="text"] {
+  font-size: 1rem;
+  padding: 0.6rem 1rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  width: 100%;
+  box-sizing: border-box;
+  background: var(--box-bg);
+  color: var(--text);
+}
+
+input[type="text"] {
+  min-width: 300px;
+}
+
+button {
+  font-size: 1rem;
+  padding: 0.6rem 1.2rem;
+  margin: 0.3rem;
+  border: none;
+  border-radius: 8px;
+  background-color: var(--primary);
+  color: white;
+  cursor: pointer;
+  transition: background-color 0.2s ease-in-out, transform 0.1s ease-in-out;
+}
+
+button:hover {
+  background-color: #1d4ed8;
+  transform: scale(1.03);
+}
+
+button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.container {
+  max-width: 800px;
+  margin: auto;
+  background: var(--box-bg);
+  padding: 2rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
+}
+
+#drop-area {
+  border: 2px dashed var(--border);
+  padding: 2rem;
+  border-radius: 10px;
+  text-align: center;
+  background-color: var(--secondary);
+  margin-bottom: 1rem;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.2s ease;
+}
+
+#drop-area.highlight {
+  background-color: var(--hover);
+  transform: scale(1.02);
+}
+
+#fileNameDisplay {
+  margin-top: 0.5rem;
+  font-weight: bold;
+}
+
+#tablePreview {
+  overflow-x: auto;
+  margin-bottom: 1rem;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 1rem;
+}
+
+table th,
+table td {
+  border: 1px solid var(--border);
+  padding: 0.5rem;
+  text-align: left;
+}
+
+.api-key-box {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.toggle-icon {
+  font-size: 1.2rem;
+  cursor: pointer;
+  user-select: none;
+}
+
+#progress {
+  margin: 1rem 0;
+  font-weight: bold;
+  color: var(--primary);
+  text-align: center;
+}
+
+.hidden {
+  display: none !important;
+}
+
+/* 📱 Responsive Design */
+@media (max-width: 600px) {
+  body {
+    padding: 1rem;
+  }
+
+  .container {
+    padding: 1rem;
+  }
+
+  h1 {
+    font-size: 1.4rem;
+  }
+
+  input,
+  button {
+    font-size: 0.9rem;
+  }
+}
