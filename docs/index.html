@@ -1,1 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Excel Address Geocoder</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <h1>Excel Address Geocoder</h1>
+        <div class="api-key-container">
+            <input type="password" id="apiKey" placeholder="Enter your Google Maps API Key">
+            <input type="checkbox" id="togglePassword"> Show API Key
+        </div>
+        <div class="file-upload">
+            <input type="file" id="fileInput" accept=".xlsx">
+            <button id="fetchBtn">Fetch Coordinates</button>
+        </div>
+        <div id="preview" class="preview"></div>
+        <div id="results" class="results"></div>
+        <button id="downloadBtn" style="display:none;">Download Result Excel</button>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
 
