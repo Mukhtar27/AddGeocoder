@@ -3,55 +3,59 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>📍 Excel Address Geocoder</title>
+  <title>Excel Address Geocoder</title>
   <link rel="stylesheet" href="style.css" />
-  <script src="https://cdn.sheetjs.com/xlsx-0.20.0/package/dist/xlsx.full.min.js"></script>
 </head>
 <body>
+  <div class="right-align">
+    <button id="darkModeToggle">🌙 Toggle Dark Mode</button>
+  </div>
+
   <div class="container">
-    <h1>📍 Excel Address Geocoder</h1>
+    <h1>Excel Address Geocoder</h1>
 
-    <!-- 🌗 Theme Toggle -->
-    <div style="text-align: right; margin-bottom: 10px;">
-      <button id="themeToggle" class="secondary">Toggle Dark Mode</button>
-    </div>
-
-    <!-- 📂 Drag & Drop Upload -->
     <div id="drop-area">
-      <p>📂 Drag & drop your Excel file here or click to browse</p>
-      <input type="file" id="fileElem" accept=".xlsx, .xls" />
-      <div id="fileNameDisplay"></div>
-      <button id="clearFileBtn" class="secondary hidden">Clear File</button>
+      <p>📁 Drag & drop your Excel file here, or click to select</p>
+      <input type="file" id="fileElem" accept=".xls,.xlsx" style="display:none;" />
     </div>
 
-    <!-- 👁️ Table Preview -->
-    <div id="tablePreview"></div>
-
-    <!-- 🔁 Progress will appear above table preview -->
-    <!-- 🧭 Progress element inserted dynamically by JS -->
-
-    <!-- 📬 Address Column Selector -->
-    <div id="addressColumnContainer" class="hidden">
-      <label for="addressSelect">Select Address Column:</label>
-      <select id="addressSelect"></select>
+    <div id="sheetSelector" class="hidden">
+      <label for="sheetSelect">Select Sheet</label>
+      <select id="sheetSelect"></select>
     </div>
 
-    <!-- 🔐 API Key Input -->
-    <div class="api-input">
-      <label for="apiKey">Google Maps API Key:</label>
+    <div id="addressSelector" class="hidden">
+      <label for="columnSelect">Select Address Column</label>
+      <select id="columnSelect"></select>
+    </div>
+
+    <div>
+      <label for="apiKey">Google Maps API Key</label>
       <div class="api-key-box">
         <input type="password" id="apiKey" placeholder="Enter your API key" />
-        <span class="toggle-icon" id="toggleApiKey">👁️</span>
+        <span id="toggleApiKey" class="toggle-icon">👁️</span>
       </div>
     </div>
 
-    <!-- 🔘 Action Buttons -->
-    <div id="actionButtons" class="hidden">
-      <button id="geocodeBtn" class="primary">Geocode Addresses</button>
-      <button id="downloadBtn" class="secondary hidden">Download Result</button>
+    <button id="startGeocoding" class="hidden">📍 Start Geocoding</button>
+    <progress id="progressBar" value="0" max="100" class="hidden"></progress>
+
+    <div id="tablePreview" class="hidden">
+      <h2>🔍 Data Preview</h2>
+      <table id="previewTable"></table>
+    </div>
+
+    <div id="resultTable" class="hidden">
+      <h2>✅ Result Overview</h2>
+      <table id="finalTable"></table>
+    </div>
+
+    <div id="downloadSection" class="hidden">
+      <button id="downloadBtn">⬇️ Download Geocoded File</button>
     </div>
   </div>
 
-  <script type="module" src="script.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <script src="script.js"></script>
 </body>
 </html>
