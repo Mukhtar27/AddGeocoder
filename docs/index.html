@@ -4,31 +4,715 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Excel Address Geocoder</title>
-    <link rel="stylesheet" href="styles.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        .pin-icon {
+            width: 40px;
+            height: 40px;
+            background: #ef4444;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .section {
+            margin-bottom: 30px;
+            padding: 25px;
+            border-radius: 15px;
+            background: #f8fafc;
+            border: 2px solid #e2e8f0;
+            transition: all 0.3s ease;
+        }
+
+        .section:hover {
+            border-color: #4f46e5;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(79, 70, 229, 0.1);
+        }
+
+        .section-title {
+            font-size: 1.2em;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: #1e293b;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .api-input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+        }
+
+        .api-input:focus {
+            outline: none;
+            border-color: #4f46e5;
+        }
+
+        .toggle-visibility {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: #64748b;
+        }
+
+        .input-container {
+            position: relative;
+        }
+
+        .upload-area {
+            border: 3px dashed #cbd5e1;
+            border-radius: 15px;
+            padding: 40px;
+            text-align: center;
+            background: white;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .upload-area:hover, .upload-area.dragover {
+            border-color: #4f46e5;
+            background: #f0f9ff;
+        }
+
+        .upload-icon {
+            font-size: 48px;
+            color: #94a3b8;
+            margin-bottom: 15px;
+        }
+
+        .upload-text {
+            color: #475569;
+            margin-bottom: 10px;
+        }
+
+        .file-limit {
+            color: #94a3b8;
+            font-size: 14px;
+        }
+
+        .browse-btn {
+            background: #4f46e5;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-top: 15px;
+            transition: background 0.3s ease;
+        }
+
+        .browse-btn:hover {
+            background: #4338ca;
+        }
+
+        .file-preview {
+            background: white;
+            border-radius: 10px;
+            padding: 15px;
+            border: 1px solid #e2e8f0;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .file-icon {
+            width: 40px;
+            height: 40px;
+            background: #22c55e;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+
+        .file-info {
+            flex: 1;
+        }
+
+        .file-name {
+            font-weight: 600;
+            color: #1e293b;
+        }
+
+        .file-size {
+            color: #94a3b8;
+            font-size: 14px;
+        }
+
+        .remove-file {
+            background: #ef4444;
+            color: white;
+            border: none;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .data-table th,
+        .data-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .data-table th {
+            background: #f8fafc;
+            font-weight: 600;
+            color: #475569;
+        }
+
+        .data-table tr:hover {
+            background: #f8fafc;
+        }
+
+        .column-select {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 16px;
+        }
+
+        .fetch-btn {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .fetch-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(16, 185, 129, 0.3);
+        }
+
+        .fetch-btn:disabled {
+            background: #94a3b8;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .success-message {
+            background: #dcfce7;
+            color: #166534;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #22c55e;
+            margin: 20px 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .download-btn {
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .download-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(245, 158, 11, 0.3);
+        }
+
+        .loading {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #4f46e5;
+            font-weight: 600;
+        }
+
+        .spinner {
+            width: 20px;
+            height: 20px;
+            border: 2px solid #e2e8f0;
+            border-top: 2px solid #4f46e5;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .error-message {
+            background: #fef2f2;
+            color: #dc2626;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #ef4444;
+            margin: 20px 0;
+        }
+
+        .hidden {
+            display: none;
+        }
+    </style>
 </head>
 <body>
     <div class="container">
-        <h1>📍 Excel Address Geocoder</h1>
-        <div class="api-key-container">
-            <input type="password" id="apiKey" placeholder="Enter your Google Maps API Key">
-            <input type="checkbox" id="togglePassword"> Show API Key
+        <div class="header">
+            <h1>
+                <div class="pin-icon">📍</div>
+                Excel Address Geocoder
+            </h1>
+            <p>Transform your address data into precise coordinates</p>
         </div>
-        <div class="file-upload">
-            <p>Upload an Excel file:</p>
-            <div id="dropArea" class="drop-area">
-                Drag and drop file here or <span id="browse">Browse files</span>
+
+        <div class="content">
+            <!-- API Key Section -->
+            <div class="section">
+                <div class="section-title">
+                    🔑 Enter your Google Maps API Key:
+                </div>
+                <div class="input-container">
+                    <input 
+                        type="password" 
+                        id="apiKey" 
+                        class="api-input" 
+                        placeholder="Enter your Google Maps API key here..."
+                    >
+                    <button class="toggle-visibility" onclick="toggleApiKeyVisibility()">👁️</button>
+                </div>
             </div>
-            <input type="file" id="fileInput" accept=".xlsx" style="display:none;">
-            <div id="fileInfo"></div>
+
+            <!-- File Upload Section -->
+            <div class="section">
+                <div class="section-title">
+                    📁 Upload an Excel File
+                </div>
+                <div class="upload-area" id="uploadArea" onclick="document.getElementById('fileInput').click()">
+                    <div class="upload-icon">📄</div>
+                    <div class="upload-text">Drag and drop file here</div>
+                    <div class="file-limit">Limit 200MB per file • XLSX</div>
+                    <button class="browse-btn" type="button">Browse files</button>
+                </div>
+                <input type="file" id="fileInput" accept=".xlsx,.xls" style="display: none;">
+                
+                <div id="filePreview" class="hidden"></div>
+            </div>
+
+            <!-- Preview Section -->
+            <div id="previewSection" class="section hidden">
+                <div class="section-title">
+                    👁️ Preview of uploaded file:
+                </div>
+                <div id="previewContent"></div>
+            </div>
+
+            <!-- Column Selection Section -->
+            <div id="columnSection" class="section hidden">
+                <div class="section-title">
+                    🎯 Select the column containing addresses:
+                </div>
+                <select id="columnSelect" class="column-select">
+                    <option value="">Choose a column...</option>
+                </select>
+            </div>
+
+            <!-- Fetch Coordinates Section -->
+            <div id="fetchSection" class="section hidden">
+                <button id="fetchBtn" class="fetch-btn" onclick="fetchCoordinates()">
+                    <span>🌍</span>
+                    Fetch Coordinates
+                </button>
+                <div id="loadingMessage" class="loading hidden">
+                    <div class="spinner"></div>
+                    Processing addresses...
+                </div>
+            </div>
+
+            <!-- Results Section -->
+            <div id="resultsSection" class="section hidden">
+                <div class="success-message">
+                    <span>✅</span>
+                    Coordinates added successfully!
+                </div>
+                <div id="resultsContent"></div>
+                <button id="downloadBtn" class="download-btn" onclick="downloadResults()">
+                    <span>⬇️</span>
+                    Download Result Excel
+                </button>
+            </div>
+
+            <div id="errorMessage" class="error-message hidden"></div>
         </div>
-        <div id="preview" class="preview"></div>
-        <div id="columnSelect" style="display:none;"></div>
-        <button id="fetchBtn" style="display:none;">Fetch Coordinates</button>
-        <div id="successMessage" style="display:none;"></div>
-        <div id="results" class="results"></div>
-        <button id="downloadBtn" style="display:none;">Download Result Excel</button>
     </div>
-    <script src="script.js"></script>
+
+    <script>
+        let uploadedData = null;
+        let processedData = null;
+        let fileName = '';
+
+        // API Key visibility toggle
+        function toggleApiKeyVisibility() {
+            const input = document.getElementById('apiKey');
+            const button = document.querySelector('.toggle-visibility');
+            
+            if (input.type === 'password') {
+                input.type = 'text';
+                button.textContent = '🙈';
+            } else {
+                input.type = 'password';
+                button.textContent = '👁️';
+            }
+        }
+
+        // File upload handling
+        const uploadArea = document.getElementById('uploadArea');
+        const fileInput = document.getElementById('fileInput');
+
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        });
+
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('dragover');
+        });
+
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                handleFile(files[0]);
+            }
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                handleFile(e.target.files[0]);
+            }
+        });
+
+        function handleFile(file) {
+            if (!file.name.match(/\.(xlsx|xls)$/)) {
+                showError('Please select a valid Excel file (.xlsx or .xls)');
+                return;
+            }
+
+            if (file.size > 200 * 1024 * 1024) {
+                showError('File size exceeds 200MB limit');
+                return;
+            }
+
+            fileName = file.name;
+            showFilePreview(file);
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, { type: 'array' });
+                    const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+                    const jsonData = XLSX.utils.sheet_to_json(firstSheet, { header: 1 });
+                    
+                    uploadedData = jsonData;
+                    showPreview(jsonData);
+                    populateColumnSelect(jsonData[0]);
+                    hideError();
+                } catch (error) {
+                    showError('Error reading Excel file. Please check the file format.');
+                }
+            };
+            reader.readAsArrayBuffer(file);
+        }
+
+        function showFilePreview(file) {
+            const preview = document.getElementById('filePreview');
+            const sizeInKB = (file.size / 1024).toFixed(1);
+            
+            preview.innerHTML = `
+                <div class="file-preview">
+                    <div class="file-icon">📊</div>
+                    <div class="file-info">
+                        <div class="file-name">${file.name}</div>
+                        <div class="file-size">${sizeInKB} KB</div>
+                    </div>
+                    <button class="remove-file" onclick="removeFile()">×</button>
+                </div>
+            `;
+            preview.classList.remove('hidden');
+        }
+
+        function removeFile() {
+            document.getElementById('filePreview').classList.add('hidden');
+            document.getElementById('previewSection').classList.add('hidden');
+            document.getElementById('columnSection').classList.add('hidden');
+            document.getElementById('fetchSection').classList.add('hidden');
+            document.getElementById('resultsSection').classList.add('hidden');
+            uploadedData = null;
+            processedData = null;
+            fileInput.value = '';
+        }
+
+        function showPreview(data) {
+            const previewSection = document.getElementById('previewSection');
+            const previewContent = document.getElementById('previewContent');
+            
+            if (data.length === 0) return;
+
+            let tableHTML = '<table class="data-table"><thead><tr>';
+            
+            // Headers
+            data[0].forEach(header => {
+                tableHTML += `<th>${header || 'Column'}</th>`;
+            });
+            tableHTML += '</tr></thead><tbody>';
+            
+            // Show first 3 rows of data
+            for (let i = 1; i < Math.min(data.length, 4); i++) {
+                tableHTML += '<tr>';
+                data[i].forEach(cell => {
+                    tableHTML += `<td>${cell || ''}</td>`;
+                });
+                tableHTML += '</tr>';
+            }
+            
+            tableHTML += '</tbody></table>';
+            previewContent.innerHTML = tableHTML;
+            previewSection.classList.remove('hidden');
+        }
+
+        function populateColumnSelect(headers) {
+            const select = document.getElementById('columnSelect');
+            const columnSection = document.getElementById('columnSection');
+            
+            select.innerHTML = '<option value="">Choose a column...</option>';
+            
+            headers.forEach((header, index) => {
+                if (header) {
+                    const option = document.createElement('option');
+                    option.value = index;
+                    option.textContent = header;
+                    select.appendChild(option);
+                }
+            });
+            
+            columnSection.classList.remove('hidden');
+            
+            select.addEventListener('change', () => {
+                if (select.value !== '') {
+                    document.getElementById('fetchSection').classList.remove('hidden');
+                } else {
+                    document.getElementById('fetchSection').classList.add('hidden');
+                }
+            });
+        }
+
+        async function fetchCoordinates() {
+            const apiKey = document.getElementById('apiKey').value.trim();
+            const columnIndex = parseInt(document.getElementById('columnSelect').value);
+            
+            if (!apiKey) {
+                showError('Please enter your Google Maps API key');
+                return;
+            }
+            
+            if (!uploadedData || columnIndex === null) {
+                showError('Please select a column containing addresses');
+                return;
+            }
+
+            const fetchBtn = document.getElementById('fetchBtn');
+            const loadingMessage = document.getElementById('loadingMessage');
+            
+            fetchBtn.disabled = true;
+            loadingMessage.classList.remove('hidden');
+
+            try {
+                const results = [...uploadedData];
+                
+                // Add new headers for coordinates
+                if (results.length > 0) {
+                    results[0].push('Latitude', 'Longitude');
+                }
+
+                // Process each row (skip header)
+                for (let i = 1; i < results.length; i++) {
+                    const address = results[i][columnIndex];
+                    if (address && address.trim()) {
+                        try {
+                            const coords = await geocodeAddress(address, apiKey);
+                            results[i].push(coords.lat, coords.lng);
+                        } catch (error) {
+                            results[i].push('Error', 'Error');
+                        }
+                        
+                        // Add small delay to respect API limits
+                        await new Promise(resolve => setTimeout(resolve, 200));
+                    } else {
+                        results[i].push('', '');
+                    }
+                }
+
+                processedData = results;
+                showResults(results);
+                hideError();
+                
+            } catch (error) {
+                showError('Error processing addresses: ' + error.message);
+            } finally {
+                fetchBtn.disabled = false;
+                loadingMessage.classList.add('hidden');
+            }
+        }
+
+        async function geocodeAddress(address, apiKey) {
+            const url = `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(address)}&key=${apiKey}`;
+            
+            const response = await fetch(url);
+            const data = await response.json();
+            
+            if (data.status === 'OK' && data.results.length > 0) {
+                const location = data.results[0].geometry.location;
+                return {
+                    lat: location.lat,
+                    lng: location.lng
+                };
+            } else {
+                throw new Error(`Geocoding failed: ${data.status}`);
+            }
+        }
+
+        function showResults(data) {
+            const resultsSection = document.getElementById('resultsSection');
+            const resultsContent = document.getElementById('resultsContent');
+            
+            if (data.length === 0) return;
+
+            let tableHTML = '<table class="data-table"><thead><tr>';
+            
+            // Headers
+            data[0].forEach(header => {
+                tableHTML += `<th>${header || 'Column'}</th>`;
+            });
+            tableHTML += '</tr></thead><tbody>';
+            
+            // Show first 3 rows of processed data
+            for (let i = 1; i < Math.min(data.length, 4); i++) {
+                tableHTML += '<tr>';
+                data[i].forEach(cell => {
+                    tableHTML += `<td>${cell || ''}</td>`;
+                });
+                tableHTML += '</tr>';
+            }
+            
+            tableHTML += '</tbody></table>';
+            resultsContent.innerHTML = tableHTML;
+            resultsSection.classList.remove('hidden');
+        }
+
+        function downloadResults() {
+            if (!processedData) return;
+            
+            const worksheet = XLSX.utils.aoa_to_sheet(processedData);
+            const workbook = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(workbook, worksheet, 'Geocoded Data');
+            
+            const newFileName = fileName.replace(/\.(xlsx|xls)$/i, '_geocoded.xlsx');
+            XLSX.writeFile(workbook, newFileName);
+        }
+
+        function showError(message) {
+            const errorDiv = document.getElementById('errorMessage');
+            errorDiv.textContent = message;
+            errorDiv.classList.remove('hidden');
+        }
+
+        function hideError() {
+            document.getElementById('errorMessage').classList.add('hidden');
+        }
+    </script>
 </body>
 </html>
