@@ -1,140 +1,73 @@
-let excelData = [];
-let selectedAddressColumn = null;
+document.getElementById('fileInput').addEventListener('change', handleFileUpload);
+document.getElementById('fetchBtn').addEventListener('click', fetchCoordinates);
+document.getElementById('downloadBtn').addEventListener('click', downloadResults);
+document.getElementById('togglePassword').addEventListener('change', togglePasswordVisibility);
 
-// Handle drag and drop
-const dropArea = document.getElementById('drop-area');
+let resultsArray = [];
 
-['dragenter', 'dragover'].forEach(eventName => {
-  dropArea.addEventListener(eventName, (e) => {
-    e.preventDefault();
-    dropArea.classList.add('highlight');
-  }, false);
-});
-
-['dragleave', 'drop'].forEach(eventName => {
-  dropArea.addEventListener(eventName, (e) => {
-    e.preventDefault();
-    dropArea.classList.remove('highlight');
-  }, false);
-});
-
-dropArea.addEventListener('drop', (e) => {
-  const dt = e.dataTransfer;
-  const file = dt.files[0];
-  document.getElementById('fileElem').files = dt.files;
-  handleFile(file);
-});
-
-document.getElementById('fileElem').addEventListener('change', (e) => {
-  const file = e.target.files[0];
-  if (file) {
-    handleFile(file);
-  }
-});
-
-function handleFile(file) {
-  const reader = new FileReader();
-  reader.onload = (e) => {
-    const data = new Uint8Array(e.target.result);
-    const workbook = XLSX.read(data, { type: 'array' });
-    const sheet = workbook.Sheets[workbook.SheetNames[0]];
-    excelData = XLSX.utils.sheet_to_json(sheet, { header: 1 });
-
-    showPreview(excelData);
-    populateColumnSelector(excelData[0]);
-  };
-  reader.readAsArrayBuffer(file);
+function handleFileUpload(event) {
+    const file = event.target.files[0];
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        const data = new Uint8Array(e.target.result);
+        const workbook = XLSX.read(data, { type: 'array' });
+        const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+        const json = XLSX.utils.sheet_to_json(firstSheet);
+        displayPreview(json);
+    };
+    reader.readAsArrayBuffer(file);
 }
 
-function showPreview(data) {
-  const table = document.getElementById('tablePreview');
-  table.innerHTML = generateTableHTML(data);
+function displayPreview(data) {
+    let preview = document.getElementById('preview');
+    preview.innerHTML = '<strong>Preview of uploaded file:</strong><br><table><tr><th>Name</th><th>Address</th></tr>';
+    data.forEach(row => {
+        preview.innerHTML += `<tr><td>${row.Name}</td><td>${row.Address}</td></tr>`;
+    });
+    preview.innerHTML += '</table>';
 }
 
-function populateColumnSelector(headers) {
-  const select = document.getElementById('columnSelect');
-  select.innerHTML = `<option value="">-- Select Column --</option>`;
-  headers.forEach((header, index) => {
-    const option = document.createElement('option');
-    option.value = index;
-    option.textContent = header;
-    select.appendChild(option);
-  });
-}
+async function fetchCoordinates() {
+    const apiKey = document.getElementById('apiKey').value;
+    const addresses = Array.from(document.querySelectorAll('#preview table tr td:nth-child(2)'))
+                           .map(td => td.textContent);
+    resultsArray = [];
 
-document.getElementById('columnSelect').addEventListener('change', (e) => {
-  selectedAddressColumn = parseInt(e.target.value);
-});
-
-document.getElementById('startButton').addEventListener('click', async () => {
-  const apiKey = document.getElementById('apiKey').value;
-  if (!apiKey || selectedAddressColumn === null) {
-    alert("Please enter an API key and select address column.");
-    return;
-  }
-
-  const outputData = [['Address', 'Latitude', 'Longitude']];
-  const progressBar = document.getElementById('progressBar');
-  progressBar.value = 0;
-  progressBar.max = excelData.length - 1;
-
-  for (let i = 1; i < excelData.length; i++) {
-    const row = excelData[i];
-    const address = row[selectedAddressColumn];
-    if (!address) continue;
-
-    try {
-      const response = await fetch(`https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(address)}&key=${apiKey}`);
-      const result = await response.json();
-      const location = result.results[0]?.geometry?.location;
-      if (location) {
-        outputData.push([address, location.lat, location.lng]);
-      } else {
-        outputData.push([address, '', '']);
-      }
-    } catch {
-      outputData.push([address, '', '']);
+    for (const address of addresses) {
+        const response = await fetch(`https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(address)}&key=${apiKey}`);
+        const result = await response.json();
+        if (result.results.length > 0) {
+            const location = result.results[0].geometry.location;
+            resultsArray.push({ address, latitude: location.lat, longitude: location.lng });
+        } else {
+            resultsArray.push({ address, latitude: 'Not Found', longitude: 'Not Found' });
+        }
     }
-
-    progressBar.value = i;
-  }
-
-  displayResults(outputData);
-  createDownload(outputData);
-});
-
-function displayResults(data) {
-  const table = document.getElementById('resultTable');
-  table.innerHTML = generateTableHTML(data);
+    displayResults();
 }
 
-function generateTableHTML(data) {
-  return `
-    <table>
-      <thead>
-        <tr>${data[0].map(cell => `<th>${cell}</th>`).join('')}</tr>
-      </thead>
-      <tbody>
-        ${data.slice(1).map(row => `<tr>${row.map(cell => `<td>${cell ?? ''}</td>`).join('')}</tr>`).join('')}
-      </tbody>
-    </table>
-  `;
+function displayResults() {
+    let results = document.getElementById('results');
+    results.innerHTML = '<strong>Results:</strong><br><table><tr><th>Address</th><th>Latitude</th><th>Longitude</th></tr>';
+    resultsArray.forEach(result => {
+        results.innerHTML += `<tr><td>${result.address}</td><td>${result.latitude}</td><td>${result.longitude}</td></tr>`;
+    });
+    results.innerHTML += '</table>';
+    document.getElementById('downloadBtn').style.display = 'block';
 }
 
-function createDownload(data) {
-  const ws = XLSX.utils.aoa_to_sheet(data);
-  const wb = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb, ws, 'Geocoded Results');
-  const wbout = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
-  const blob = new Blob([wbout], { type: "application/octet-stream" });
+function downloadResults() {
+    const ws = XLSX.utils.json_to_sheet(resultsArray);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Results");
+    XLSX.writeFile(wb, "GeocodedResults.xlsx");
+}
 
-  const downloadLink = document.createElement('a');
-  downloadLink.href = URL.createObjectURL(blob);
-  downloadLink.download = 'geocoded_output.xlsx';
-  downloadLink.textContent = 'Download Geocoded Excel File';
-  downloadLink.style.marginTop = '1rem';
-  downloadLink.style.display = 'inline-block';
-
-  const container = document.querySelector('.container');
-  container.appendChild(downloadLink);
+function togglePasswordVisibility() {
+    const apiKeyInput = document.getElementById('apiKey');
+    if (this.checked) {
+        apiKeyInput.type = 'text'; // Show the API key
+    } else {
+        apiKeyInput.type = 'password'; // Hide the API key
+    }
 }
